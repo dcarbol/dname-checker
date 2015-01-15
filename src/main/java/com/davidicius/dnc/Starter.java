@@ -1,13 +1,10 @@
 package com.davidicius.dnc;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,34 +14,41 @@ public class Starter {
     private static final Logger log = LoggerFactory.getLogger(Starter.class);
 
     public static void main(String[] args) throws IOException {
-        log.debug("DNC 0.1 Started...");
+        log.debug("DNC 0.2 Started...");
+        String domainName = "kofsdsola.cz";
+        Document doc = Jsoup.connect("http://www.nic.cz/whois/?q=" + domainName).get();
+        if (doc.toString().contains("Záznam nenalezen")) {
+            log.info("No results for domain '" + domainName + "'");
+            return;
+        }
 
-        CloseableHttpClient httpclient = HttpClients.createDefault();
-        try {
-            HttpGet httpget = new HttpGet("http://www.nic.cz/whois/");
+        Elements select = doc.select("table.result>tbody>tr");
+        if (select.size() == 0) {
+            log.warn("Corrupted result page for domain '" + domainName + "'");
+            return;
+        }
 
-            System.out.println("Executing request " + httpget.getRequestLine());
+        for (Element element : select) {
+            Elements list = element.getElementsByTag("th");
+            if (list.size() != 1) {
+                log.warn("Corrupted result page for domain '" + domainName + "'");
+                continue;
+            }
 
-            // Create a custom response handler
-            ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
+            Element e = list.get(0);
+            String key = e.text().trim();
 
-                public String handleResponse(
-                        final HttpResponse response) throws ClientProtocolException, IOException {
-                    int status = response.getStatusLine().getStatusCode();
-                    if (status >= 200 && status < 300) {
-                        HttpEntity entity = response.getEntity();
-                        return entity != null ? EntityUtils.toString(entity) : null;
-                    } else {
-                        throw new ClientProtocolException("Unexpected response status: " + status);
-                    }
-                }
+            list = element.getElementsByTag("td");
+            if (list.size() != 1) {
+                log.warn("Corrupted result page for domain '" + domainName + "'");
+                continue;
+            }
 
-            };
-            String responseBody = httpclient.execute(httpget, responseHandler);
-            System.out.println("----------------------------------------");
-            System.out.println(responseBody);
-        } finally {
-            httpclient.close();
+            e = list.get(0);
+            String value = e.text().trim();
+
+            System.out.println(String.format("'%s' = '%s'", key, value));
+
         }
     }
 }
