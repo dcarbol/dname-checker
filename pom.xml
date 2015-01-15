@@ -49,27 +49,27 @@
           <artifactId>jsoup</artifactId>
           <version>1.8.1</version>
         </dependency>
-        <!--&lt;!&ndash;Orient DB&ndash;&gt;-->
-        <!--<dependency>-->
-          <!--<groupId>com.orientechnologies</groupId>-->
-          <!--<artifactId>orient-commons</artifactId>-->
-          <!--<version>1.7.10</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-          <!--<groupId>com.orientechnologies</groupId>-->
-          <!--<artifactId>orientdb-core</artifactId>-->
-          <!--<version>1.7.10</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-          <!--<groupId>com.orientechnologies</groupId>-->
-          <!--<artifactId>orientdb-server</artifactId>-->
-          <!--<version>1.7.10</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-          <!--<groupId>com.orientechnologies</groupId>-->
-          <!--<artifactId>orientdb-graphdb</artifactId>-->
-          <!--<version>1.7.10</version>-->
-        <!--</dependency>-->
+        <!--Orient DB-->
+        <dependency>
+          <groupId>com.orientechnologies</groupId>
+          <artifactId>orient-commons</artifactId>
+          <version>1.7.10</version>
+        </dependency>
+        <dependency>
+          <groupId>com.orientechnologies</groupId>
+          <artifactId>orientdb-core</artifactId>
+          <version>1.7.10</version>
+        </dependency>
+        <dependency>
+          <groupId>com.orientechnologies</groupId>
+          <artifactId>orientdb-server</artifactId>
+          <version>1.7.10</version>
+        </dependency>
+        <dependency>
+          <groupId>com.orientechnologies</groupId>
+          <artifactId>orientdb-graphdb</artifactId>
+          <version>1.7.10</version>
+        </dependency>
     </dependencies>
 
     <build>
