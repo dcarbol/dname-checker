@@ -70,6 +70,16 @@
     <orderEntry type="library" name="Maven: org.apache.ant:ant-launcher:1.8.3" level="project" />
     <orderEntry type="library" name="Maven: org.fusesource.jansi:jansi:1.5" level="project" />
     <orderEntry type="library" name="Maven: jline:jline:0.9.94" level="project" />
+    <orderEntry type="library" name="Maven: com.orientechnologies:orientdb-lucene:1.7.10" level="project" />
+    <orderEntry type="library" name="Maven: com.orientechnologies:orient-commons:test-jar:tests:1.7.10" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-core:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-analyzers-common:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queryparser:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-queries:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-sandbox:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-misc:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: org.apache.lucene:lucene-spatial:4.7.0" level="project" />
+    <orderEntry type="library" name="Maven: com.spatial4j:spatial4j:0.4.1" level="project" />
   </component>
 </module>
 
