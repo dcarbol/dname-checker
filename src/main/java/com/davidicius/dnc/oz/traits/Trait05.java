@@ -1,5 +1,7 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,33 +23,30 @@ public class Trait05 extends AbstractTrait {
         return "Title";
     }
 
-    Pattern pattern01 = Pattern.compile("klementa\\s+839");
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
-
-//        if (pattern01.matcher(page.toLowerCase()).find()) {
-//            return true;
-//        }
-
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
+        if (page == null || document == null) return false;
+        if (oz == null) {
+            log.warn(String.format("Domain %s, trait %s: Domain has no valid OZ'", domain.getProperty("name"), getName()));
             return false;
         }
 
-        Elements c = doc.select("title");
+        String domainName = domain.getProperty("name").toString().toLowerCase();
+        Elements c = document.select("title");
         for (Element e : c) {
             String title = e.text();
             title = normalizePage(title);
 
-            if (title.contains(domain.getProperty("name").toString())) {
+            if (title.contains(domainName)) {
                 continue;
             }
 
-            // @todo Title obsahuje nazev OZ...
-            if (title.contains("skoda")) {
+            if (title.contains(oz.getName())) {
+                if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                    log.info(String.format("Domain %s, trait %s: Title '%s' contains OZ '%s''", domain.getProperty("name"), getName(), title, oz.getName()));
+                }
+
                 return true;
             }
         }

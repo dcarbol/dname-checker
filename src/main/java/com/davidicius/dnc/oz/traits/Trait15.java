@@ -1,6 +1,9 @@
 package com.davidicius.dnc.oz.traits;
 
 import com.davidicius.dnc.oz.DbService;
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.OzWorker;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Direction;
 import com.tinkerpop.blueprints.Edge;
 import com.tinkerpop.blueprints.Vertex;
@@ -25,25 +28,14 @@ public class Trait15 extends AbstractTrait {
         return "BLinks";
     }
 
-//    Pattern pattern01 = Pattern.compile("klementa\\s+839");
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+        if (page == null || document == null) return false;
 
-
-//        if (pattern01.matcher(page.toLowerCase()).find()) {
-//            return true;
-//        }
-
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
-            return false;
-        }
 
         String domainName = domain.getProperty("name");
-        Elements c = doc.select("a");
+        Elements c = document.select("a");
         int count = 0;
         for (Element e : c) {
             String href = e.attr("href");
@@ -60,6 +52,10 @@ public class Trait15 extends AbstractTrait {
                     boolean bad = edges.iterator().hasNext();
 
                     if (bad) {
+                        if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                            log.info(String.format("Domain %s, trait %s: HREF to bad host '%s' for domain '%s'", domain.getProperty("name"), getName(), host, OzWorker.toStringDOM(vertex)));
+                        }
+
                         count++;
                     }
                 }

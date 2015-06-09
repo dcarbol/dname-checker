@@ -13,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 public class DbService {
@@ -21,6 +24,7 @@ public class DbService {
     private ODatabaseDocumentTx database;
     private OIndex<?> domNameIndex;
     private OIndex<?> ozNumberIndex;
+    private OIndex<?> ozNameIndex;
 
     public static DbService db = new DbService();
 
@@ -60,11 +64,13 @@ public class DbService {
                 }
 
                 //                vertexType.createProperty("czDomeny", OType.STRING);
+//                                vertexType.createProperty("ozName", OType.STRING);
                 //                vertexType.createProperty("czTom", OType.STRING);
                 //                vertexType.createProperty("skDomeny", OType.STRING);
                 //                vertexType.createProperty("owner", OType.STRING);
 
                 //    vertexType.createIndex("DOM.name", OClass.INDEX_TYPE.UNIQUE, "name");
+//                    vertexType.createIndex("DOM.ozName", OClass.INDEX_TYPE.NOTUNIQUE, "ozName");
                 //     graph.dropIndex("DOM.fulltext");
                 //                ODocument metadata = new ODocument();
                 //                metadata.field("indexRadix", true);
@@ -96,9 +102,11 @@ public class DbService {
 
             OrientVertexType vertexType = graph.getVertexType("DOM");
             domNameIndex = vertexType.getClassIndex("DOM.name");
+            ozNameIndex = vertexType.getClassIndex("DOM.ozName");
 
             vertexType = graph.getVertexType("OZ");
             ozNumberIndex = vertexType.getClassIndex("OZ.ozNumber");
+
 
             log.info("DB started");
         }
@@ -119,6 +127,14 @@ public class DbService {
 
     public OIndex<?> getDomNameIndex() {
         return domNameIndex;
+    }
+
+    public OIndex<?> getOzNameIndex() {
+        return ozNameIndex;
+    }
+
+    public OIndex<?> getOzNumberIndex() {
+        return ozNumberIndex;
     }
 
     public Vertex getDomain(String domainName) {
@@ -146,6 +162,25 @@ public class DbService {
             return DbService.db.graph().getVertex(oo);
         } else {
             return null;
+        }
+    }
+
+    public Set<Vertex> getDomForOzName(String ozName) {
+        Object o = ozNameIndex.get(ozName);
+        if (o instanceof Set) {
+            Set s = (Set) o;
+            if (s.isEmpty()) {
+                return Collections.emptySet();
+            }
+
+            Set<Vertex> v = new HashSet<Vertex>();
+            for (Object oo : s) {
+                v.add(DbService.db.graph().getVertex(oo));
+            }
+
+            return v;
+        } else {
+            return Collections.emptySet();
         }
     }
 

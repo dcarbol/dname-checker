@@ -1,6 +1,8 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
 import com.tinkerpop.blueprints.Vertex;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +17,7 @@ public class Trait00 extends AbstractTrait {
         return "NoPage";
     }
 
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
 
         String loaded = domain.getProperty("loaded");
@@ -24,10 +26,6 @@ public class Trait00 extends AbstractTrait {
             return false;
         }
 
-        if (page != null && page.trim().equals("")) {
-            return true;
-        }
-
-        return loaded.equals("E");
+        return page != null && page.equals("") || loaded.equals("E");
     }
 }

@@ -1,7 +1,8 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -19,84 +20,68 @@ public class Trait08 extends AbstractTrait {
         return "Ads";
     }
 
-    public boolean hasTrait(Vertex domain, String page) {
+    private static String[] pageContains = {"googletag.pubads()", "hit.gemius.pl"};
+    private static String[] scriptContains = {"ad.czechia.com/js", "pagead2.googlesyndication.com", "i.imedia.cz/js", "ad2.billboard.cz", "ibillboard.com",
+            "go.cz.bbelements.com", "google.com/adsense/domains/caf.js",
+    "http://c.imedia.cz/js", "out.sklik.cz/js/script.js", "s.adexpert.cz"};
+
+    private static String[] hrefContains = {"hit.gemius.pl/hitredir", "ad2.billboard.cz", "go.cz.bbelements.com", "adclick.g.doubleclick.net", "c.imedia.cz/click", "tracking.espoluprace.cz", "api.nejprovize.cz", "dpbolvw.net/click"};
+    private static String[] imgContains = {"tracking.affiliateclub.cz", "tracking.espoluprace.cz"};
+    private static String[] objectContains = {"pap.onioprovize.cz"};
+
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+        if (page == null || document == null) return false;
 
-        String pp = normalizePage(page);
-        if (pp.contains("googletag.pubads()")) {
-            return true;
-        }
+        int ads = 0;
+        for (String s : pageContains) {
+            if (page.contains(s)) {
+                if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                    log.info(String.format("Domain %s, trait %s: Page contains Ads '%s''", domain.getProperty("name"), getName(), s));
+                }
 
-        // Hodne silna podminka!!! @todo
-        if (pp.contains("hit.gemius.pl")) {
-            return true;
-        }
-
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
-            return false;
+                ads++;
+            }
         }
 
         //@todo clubskoda.cz.... maji tam vlastn9 reklamu :( hledej banner...
-        Elements c = doc.select("script");
+        Elements c = document.select("script");
         for (Element e : c) {
             String src = e.attr("src").toLowerCase();
 
-            if (src.contains("ad.czechia.com/js")) {
-                return true;
-            }
+            for (String s : scriptContains) {
+                if (src.contains(s)) {
+                    if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                        log.info(String.format("Domain %s, trait %s: Page contains script Ads '%s''", domain.getProperty("name"), getName(), s));
+                    }
 
+                    ads++;
+                }
+            }
 //            if (src.contains("pagead2.googlesyndication.com/pagead/show_ads.js")) {
 //                return true;
 //            }
 
-            if (src.contains("pagead2.googlesyndication.com")) {
-                return true;
-            }
-
-            if (src.contains("i.imedia.cz/js")) {
-                return true;
-            }
-
 //            if (src.contains("www.googleadservices.com")) {
 //                return true;
 //            }
-
-            if (src.contains("ad2.billboard.cz")) {
-                return true;
-            }
-
-            if (src.contains("ibillboard.com")) {
-                return true;
-            }
-
-            if (src.contains("go.cz.bbelements.com")) {
-                return true;
-            }
         }
 
-        c = doc.select("a");
+        c = document.select("a");
         for (Element e : c) {
             String src = e.attr("href").toLowerCase();
 
-            if (src.contains("hit.gemius.pl/hitredir")) {
-                return true;
+            for (String s : hrefContains) {
+                if (src.contains(s)) {
+                    if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                        log.info(String.format("Domain %s, trait %s: Page contains href Ads '%s''", domain.getProperty("name"), getName(), s));
+                    }
+
+                    ads++;
+                }
             }
 
-            if (src.contains("ad2.billboard.cz")) {
-                return true;
-            }
-
-            if (src.contains("go.cz.bbelements.com")) {
-                return true;
-            }
-
-            if (src.contains("adclick.g.doubleclick.net")) {
-                return true;
-            }
 
             // todo - prilis silna podminka kvuli skoda/nahradni/dily
 //            if (src.contains("banner")) {
@@ -105,12 +90,33 @@ public class Trait08 extends AbstractTrait {
 
         }
 
-        c = doc.select("img");
+        c = document.select("img");
         for (Element e : c) {
             String src = e.attr("src").toLowerCase();
 
-            if (src.contains("tracking.affiliateclub.cz")) {
-                return true;
+            for (String s : imgContains) {
+                if (src.contains(s)) {
+                    if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                        log.info(String.format("Domain %s, trait %s: Page contains img Ads '%s'", domain.getProperty("name"), getName(), s));
+                    }
+
+                    ads++;
+                }
+            }
+        }
+
+        c = document.select("object");
+        for (Element e : c) {
+            String src = e.attr("data").toLowerCase();
+
+            for (String s : objectContains) {
+                if (src.contains(s)) {
+                    if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                        log.info(String.format("Domain %s, trait %s: Page contains img Ads '%s'", domain.getProperty("name"), getName(), s));
+                    }
+
+                    ads++;
+                }
             }
         }
 
@@ -123,6 +129,6 @@ public class Trait08 extends AbstractTrait {
 //            }
 //        }
 
-        return false;
+        return ads > 0;
     }
 }

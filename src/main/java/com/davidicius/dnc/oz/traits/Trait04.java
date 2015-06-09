@@ -1,5 +1,8 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.OZFactory;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -20,47 +23,32 @@ public class Trait04 extends AbstractTrait {
     }
 
     public String getName() {
-        return "Links";
+        return "GLinks";
     }
 
-//    Pattern pattern01 = Pattern.compile("klementa\\s+839");
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+        if (page == null || document == null) return false;
 
-
-//        if (pattern01.matcher(page.toLowerCase()).find()) {
-//            return true;
-//        }
-
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
+        if (oz == null) {
+            log.warn(String.format("Domain %s, trait %s: Domain has no valid OZ'", domain.getProperty("name"), getName()));
             return false;
         }
 
-        Elements c = doc.select("a");
+        Elements c = document.select("a");
         for (Element e : c) {
             String href = e.attr("href");
-            try {
-                URL url = new URL(href);
-                String host = url.getHost().toLowerCase();
-                if (host.startsWith("www.")) host = host.substring("www.".length());
 
-                //@todo
-                if (host.equals("auto-skoda.cz")) return true;
-                if (host.equals("skoda-auto.cz")) return true;
-                if (host.equals("skoda-auto.com")) return true;
-                if (host.endsWith(".auto-skoda.cz")) return true;
-                if (host.endsWith(".skoda-auto.cz")) return true;
-                if (host.equals("skoda.cz")) return true;
-                if (host.equals("skoda-auto.sk")) return true;
+            String goodDomain = oz.isGoodDomain(href);
+            if (goodDomain != null) {
+                if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                    log.info(String.format("Domain %s, trait %s: <a href='%s'> references good domain '%s''", domain.getProperty("name"), getName(), href, goodDomain));
+                }
 
-            } catch (MalformedURLException e1) {
+                return true;
             }
         }
-
 
         return false;
     }

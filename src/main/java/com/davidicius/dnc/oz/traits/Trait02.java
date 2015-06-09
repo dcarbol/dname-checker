@@ -1,6 +1,9 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +24,16 @@ public class Trait02 extends AbstractTrait {
 
     Pattern pattern01 = Pattern.compile("http-equiv\\s*=\\s*\"refresh\"");
 
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
 
         if (page != null) {
             if (pattern01.matcher(page.toLowerCase()).find()) {
+                if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                    log.info(String.format("Domain %s, trait %s: Page matches '%s'", domain.getProperty("name"), getName(), pattern01.toString()));
+                }
+
                 return true;
             }
         }
@@ -36,24 +43,11 @@ public class Trait02 extends AbstractTrait {
 
         String domainName = domain.getProperty("name");
 
-        try {
-            URL furl = new URL(f.trim());
-            String path = furl.getPath().toLowerCase();
-            if (path.contains("suspendedpage")) {
-                return true;
-            }
+        String fh = normalizeUrl(f);
+        String dh = domainName;
+        if (dh.startsWith("www.")) dh = dh.substring("www.".length());
 
-            if (path.contains("non-existing-virtual")) {
-                return true;
-            }
-
-            String fh = furl.getHost();
-            if (fh.startsWith("www.")) fh = fh.substring("www.".length());
-
-            String dh = domainName;
-            if (dh.startsWith("www.")) dh = dh.substring("www.".length());
-
-            //@todo - ignorovat forward na legalni stranky...
+     /*       //@todo - ignorovat forward na legalni stranky...
             // @toto / ignorovat forward na strankz STEJNEHO ownera
             if (fh.equals("skoda-auto.sk")) {
                 return false;
@@ -66,14 +60,16 @@ public class Trait02 extends AbstractTrait {
             if (fh.equals("skoda.cz")) {
                 return false;
             }
+       */
 
-            if (dh.equals(fh)) return false;
+        if (!dh.equals(fh)) {
+            if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                log.info(String.format("Domain %s, trait %s: Domain '%s' differs from forward '%s'", domain.getProperty("name"), getName(), dh, fh));
+            }
 
             return true;
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        } else {
+            return false;
         }
-
-        return false;
     }
 }

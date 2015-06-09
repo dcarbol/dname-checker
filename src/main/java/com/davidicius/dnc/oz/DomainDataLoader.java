@@ -1,6 +1,7 @@
 package com.davidicius.dnc.oz;
 
 import com.davidicius.dnc.Starter;
+import com.davidicius.dnc.oz.traits.AbstractTrait;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocument;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
@@ -83,29 +84,29 @@ public class DomainDataLoader {
     }
 
     public static String entityToString(final HttpEntity entity, final Charset defaultCharset) throws IOException, ParseException {
-         Args.notNull(entity, "Entity");
+        Args.notNull(entity, "Entity");
 
-         final InputStream instream = entity.getContent();
-         if (instream == null) {
-             return null;
-         }
+        final InputStream instream = entity.getContent();
+        if (instream == null) {
+            return null;
+        }
 
-         try {
-             Args.check(entity.getContentLength() <= Integer.MAX_VALUE, "HTTP entity too large to be buffered in memory");
-             int i = (int)entity.getContentLength();
-             if (i < 0) {
-                 i = 4096;
-             }
+        try {
+            Args.check(entity.getContentLength() <= Integer.MAX_VALUE, "HTTP entity too large to be buffered in memory");
+            int i = (int) entity.getContentLength();
+            if (i < 0) {
+                i = 4096;
+            }
 
-             Charset charset = null;
-             try {
-                 final ContentType contentType = ContentType.get(entity);
-                 if (contentType != null) {
-                     charset = contentType.getCharset();
-                 }
-             } catch (final UnsupportedCharsetException ex) {
-                 throw new UnsupportedEncodingException(ex.getMessage());
-             }
+            Charset charset = null;
+            try {
+                final ContentType contentType = ContentType.get(entity);
+                if (contentType != null) {
+                    charset = contentType.getCharset();
+                }
+            } catch (final UnsupportedCharsetException ex) {
+                throw new UnsupportedEncodingException(ex.getMessage());
+            }
 
 //             if (charset == null) {
 //                 charset = defaultCharset;
@@ -114,30 +115,30 @@ public class DomainDataLoader {
 //                 charset = HTTP.DEF_CONTENT_CHARSET;
 //             }
 
-             //final Reader reader = new InputStreamReader(instream, charset);
-             final ByteArrayBuffer buffer = new ByteArrayBuffer(i);
-             int size;
-             byte[] byteBuffer = new byte[100*1000];
-             while((size = instream.read(byteBuffer)) != -1) {
-                 buffer.append(byteBuffer, 0, size);
-             }
+            //final Reader reader = new InputStreamReader(instream, charset);
+            final ByteArrayBuffer buffer = new ByteArrayBuffer(i);
+            int size;
+            byte[] byteBuffer = new byte[100 * 1000];
+            while ((size = instream.read(byteBuffer)) != -1) {
+                buffer.append(byteBuffer, 0, size);
+            }
 
-             if (charset == null) {
-                 Document doc = Jsoup.parse(new String(buffer.buffer()));
-                 if (doc != null) {
-                     Elements elements = doc.select("meta[http-equiv]");
-                     for (Element e : elements) {
-                         String httpEquiv = e.attr("http-equiv");
-                         if (!httpEquiv.equalsIgnoreCase("content-type")) {
-                             continue;
-                         }
+            if (charset == null) {
+                Document doc = Jsoup.parse(new String(buffer.buffer()));
+                if (doc != null) {
+                    Elements elements = doc.select("meta[http-equiv]");
+                    for (Element e : elements) {
+                        String httpEquiv = e.attr("http-equiv");
+                        if (!httpEquiv.equalsIgnoreCase("content-type")) {
+                            continue;
+                        }
 
-                         String content = e.attr("content");
-                         if (content != null) {
+                        String content = e.attr("content");
+                        if (content != null) {
                             String[] parts = content.split(";");
                             for (String part : parts) {
                                 part = part.trim().toLowerCase();
-                                if(part.startsWith("charset")) {
+                                if (part.startsWith("charset")) {
                                     String[] kv = part.split("=");
                                     if (kv.length == 2) {
                                         String cs = kv[1].trim();
@@ -145,20 +146,20 @@ public class DomainDataLoader {
                                     }
                                 }
                             }
-                         }
-                     }
-                 }
-             }
+                        }
+                    }
+                }
+            }
 
-             if (charset == null) {
-                 charset = defaultCharset;
-             }
+            if (charset == null) {
+                charset = defaultCharset;
+            }
 
-             return new String(buffer.buffer(), charset);
-         } finally {
-             instream.close();
-         }
-     }
+            return new String(buffer.buffer(), charset);
+        } finally {
+            instream.close();
+        }
+    }
 
     public static boolean loadPage(String domainName, List<String> forwards) throws IOException {
         log.info("Start loading page: " + domainName);
@@ -168,7 +169,7 @@ public class DomainDataLoader {
 //                .setDefaultCookieStore(cookieStore)
 //                .build();
 
-        byte[] start = new byte[1000*4];
+        byte[] start = new byte[1000 * 4];
         try {
             HttpClientContext context = HttpClientContext.create();
             HttpUriRequest request = RequestBuilder.get()
@@ -209,13 +210,15 @@ public class DomainDataLoader {
         private static final Logger log = LoggerFactory.getLogger(Consumer.class);
         final private OrientGraph graph;
         final private ODatabaseDocumentTx documentTx;
+        final private boolean checkOnlyExistence;
 
         private String domainName;
 
-        public Consumer(String domainName, OrientGraph graph, ODatabaseDocumentTx documentTx) {
+        public Consumer(String domainName, OrientGraph graph, ODatabaseDocumentTx documentTx, boolean checkOnlyExistence) {
             this.domainName = domainName;
             this.graph = graph;
             this.documentTx = documentTx;
+            this.checkOnlyExistence = checkOnlyExistence;
         }
 
         public void run() {
@@ -265,6 +268,8 @@ public class DomainDataLoader {
                     graph.commit();
                 }
             }
+
+            if (checkOnlyExistence) return;
 
             if (exists.equalsIgnoreCase("E")) {
                 if (loadOwner && czDomain) {
@@ -325,17 +330,34 @@ public class DomainDataLoader {
 
             // Updating traits.
             String body = null;
+            org.jsoup.nodes.Document document = null;
+            OZ thisOz = null;
             try {
                 File file = new File("pages");
                 file = new File(file, domainName);
-                body = FileUtils.readFileToString(file);
-            } catch (IOException e) {
+                body = FileUtils.readFileToString(file, "UTF-8");
 
+                document = Jsoup.parse(body);
+                if (document == null) {
+                    log.warn("Cannot parse page for domain: " + v.getProperty("name"));
+                }
+
+                String oz = v.getProperty("ozName");
+                if (oz == null) {
+                    log.warn(String.format("Domain %s has no OZ.", v.getProperty("name")));
+                } else {
+                    thisOz = OZFactory.OZ.find(oz);
+                    if (thisOz == null) {
+                        log.warn(String.format("OZ %s cannot be found in factory.", oz));
+                    }
+                }
+            } catch (IOException e) {
             }
 
+            body = AbstractTrait.normalizePage(body);
             StringBuilder sb = new StringBuilder();
             for (Trait trait : TraitsFactory.INSTANCE.traits()) {
-                boolean result = trait.hasTrait(v, body);
+                boolean result = trait.hasTrait(v, body, document, thisOz);
                 if (result) {
                     sb.append(trait.getId()).append(" ");
                 }
@@ -354,12 +376,12 @@ public class DomainDataLoader {
 
     public DomainDataLoader() {
         log.info("Starting Domain Data Loader...");
-        this.queue = new ArrayBlockingQueue<Runnable>(5000);
+        this.queue = new ArrayBlockingQueue<Runnable>(100000);
         this.threadPool = new ThreadPoolExecutor(5, 5, 5, TimeUnit.SECONDS, this.queue);
     }
 
-    public void processDomain(String domainName, OrientGraph graph) {
-        this.threadPool.execute(new Consumer(domainName, graph, graph.getRawGraph()));
+    public void processDomain(String domainName, OrientGraph graph, boolean checkOnlyExistence) {
+        this.threadPool.execute(new Consumer(domainName, graph, graph.getRawGraph(), checkOnlyExistence));
     }
 
     public void stop() {

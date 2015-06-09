@@ -1,6 +1,8 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
 import com.tinkerpop.blueprints.Vertex;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +21,7 @@ public class Trait14 extends AbstractTrait {
 
     Pattern pattern01 = Pattern.compile("cena.{1,20}sms");
 
-    public boolean hasTrait(Vertex domain, String page) {
-        if (!forceExists(domain)) return false;
-        if (!forceLoaded(domain, page)) return false;
-
-        page = normalizePage(page);
-        if (pattern01.matcher(page).find()) {
-            return true;
-        }
-
-        return false;
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
+        return forceExists(domain) && forceLoaded(domain, page) && pattern01.matcher(page).find();
     }
 }

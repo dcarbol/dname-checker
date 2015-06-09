@@ -1,5 +1,7 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,26 +21,24 @@ public class Trait07 extends AbstractTrait {
         return "SKeywords";
     }
 
-    private static String[] BAD = {"webhosting", "domeny", "domena", "hosting", "serverhosting", "freehosting", "zdarma"};
+    private static String[] BAD = {"webhosting", "domeny", "domena", "hosting", "serverhosting", "freehosting"};
 
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+        if (page == null || document == null) return false;
 
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
-            return false;
-        }
-
-        Elements c = doc.select("meta[name=keywords");
+        Elements c = document.select("meta[name=keywords]");
         for (Element e : c) {
             String keywords = e.attr("content");
             keywords = normalizePage(keywords);
 
             for (String bad : BAD) {
                 if (keywords.contains(bad)) {
+                    if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                        log.info(String.format("Domain %s, trait %s: Keywords '%s' contains suspicious keyword '%s''", domain.getProperty("name"), getName(), keywords, bad));
+                    }
+
                     return true;
                 }
             }

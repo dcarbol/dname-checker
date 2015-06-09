@@ -9,6 +9,7 @@ import java.util.Map;
 public class TraitsFactory {
     public static final TraitsFactory INSTANCE = new TraitsFactory();
     private Map<String, Trait> traits = new LinkedHashMap<String, Trait>();
+    private boolean VERBOSE = false;
 
     static {
         INSTANCE.register(new Trait00());
@@ -27,6 +28,7 @@ public class TraitsFactory {
         INSTANCE.register(new Trait13());
         INSTANCE.register(new Trait14());
         INSTANCE.register(new Trait15());
+        INSTANCE.register(new Trait16());
     }
 
     public void register(Trait trait) {
@@ -39,5 +41,13 @@ public class TraitsFactory {
 
     public Trait getTrait(String traitId) {
         return traits.get(traitId);
+    }
+
+    public void setVERBOSE(boolean VERBOSE) {
+        this.VERBOSE = VERBOSE;
+    }
+
+    public boolean isVERBOSE() {
+        return VERBOSE;
     }
 }

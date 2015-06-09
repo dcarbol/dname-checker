@@ -1,6 +1,8 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
 import com.tinkerpop.blueprints.Vertex;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,15 +21,14 @@ public class Trait13 extends AbstractTrait {
         return "BForward";
     }
 
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
 
         String f = domain.getProperty("forward");
-        if (f == null || f.trim().equals("")) return false;
+        if (f == null || f.trim().equals("") || page == null) return false;
 
         String domainName = domain.getProperty("name");
-
         try {
             URL furl = new URL(f.trim());
 
@@ -57,6 +58,9 @@ public class Trait13 extends AbstractTrait {
                 return true;
             }
 
+            if (page.contains("dt001.net")) {
+                return true;
+            }
             return false;
         } catch (MalformedURLException e) {
             e.printStackTrace();

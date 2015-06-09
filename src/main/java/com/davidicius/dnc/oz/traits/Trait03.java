@@ -1,6 +1,9 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,11 +21,22 @@ public class Trait03 extends AbstractTrait {
         return "Size";
     }
 
-    public boolean hasTrait(Vertex domain, String page) {
-        if (!forceExists(domain)) return false;
-        if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
 
-        return page.length() < 5*1000;
+        if (forceExists(domain)) {
+            if (forceLoaded(domain, page)) {
+                if (page != null) {
+                    if (page.length() < 5 * 1000) {
+                        if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                            log.info(String.format("Domain %s, trait %s: Page has less then 5 000 characters.'", domain.getProperty("name"), getName()));
+                        }
+
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }

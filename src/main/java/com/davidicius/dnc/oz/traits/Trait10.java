@@ -1,5 +1,7 @@
 package com.davidicius.dnc.oz.traits;
 
+import com.davidicius.dnc.oz.OZ;
+import com.davidicius.dnc.oz.TraitsFactory;
 import com.tinkerpop.blueprints.Vertex;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -19,18 +21,20 @@ public class  Trait10 extends AbstractTrait {
         return "Frames";
     }
 
-    public boolean hasTrait(Vertex domain, String page) {
+    public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
         if (!forceExists(domain)) return false;
         if (!forceLoaded(domain, page)) return false;
-        if (page == null) return false;
+        if (page == null || document == null) return false;
 
-        Document doc = Jsoup.parse(page);
-        if (doc == null) {
-            log.warn("Cannot parse page for domain: " + domain.getProperty("name"));
+        Elements c = document.select("frame");
+        if (c.size() >= 2) {
+            if (TraitsFactory.INSTANCE.isVERBOSE()) {
+                log.info(String.format("Domain %s, trait %s: Page contains >= 2 frames.", domain.getProperty("name"), getName()));
+            }
+
+            return true;
+        } else {
             return false;
         }
-
-        Elements c = doc.select("frame");
-        return c.size() >= 2;
     }
 }

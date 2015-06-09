@@ -5,6 +5,8 @@ import com.tinkerpop.blueprints.Vertex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.Normalizer;
 import java.util.regex.Pattern;
 
@@ -26,12 +28,30 @@ public abstract class AbstractTrait implements Trait {
         return page != null;
     }
 
-    protected String normalizePage(String s) {
+    public static String normalizePage(String s) {
+        if (s == null) return null;
+
         String noAccent = Normalizer.normalize(s, Normalizer.Form.NFD);
         Pattern pattern = Pattern.compile("\\p{InCombiningDiacriticalMarks}+");
         noAccent = pattern.matcher(noAccent).replaceAll("");
 
         return noAccent.replaceAll("\\s+", " ").toLowerCase();
+    }
+
+    public String normalizeUrl(String s) {
+        if (s == null) return null;
+
+        URL furl = null;
+        try {
+            furl = new URL(s.trim());
+        } catch (MalformedURLException e) {
+            return s;
+        }
+
+        String fh = furl.getHost();
+        if (fh.startsWith("www.")) fh = fh.substring("www.".length());
+
+        return fh.toLowerCase().trim();
     }
 
     @Override
