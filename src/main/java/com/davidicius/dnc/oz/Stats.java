@@ -41,17 +41,17 @@ public class Stats {
             }
 
             if (_exists.equals("?")) {
-                System.out.println(v);
+             //   System.out.println(v);
             }
 
             if (!_loaded.equals("L")) {
 //                System.out.println(v);
             }
 
-            String _czDomeny = v.getProperty("czDomeny").toString();
-            String _czTom = v.getProperty("czTom").toString();
-            String _top1m = v.getProperty("top1m").toString();
-            String _skDomeny = v.getProperty("skDomeny").toString();
+            String _czDomeny = v.getProperty("czDomeny") != null ? v.getProperty("czDomeny").toString() : "?";
+            String _czTom = v.getProperty("czTom") != null ? v.getProperty("czTom").toString() : "?";
+            String _top1m = v.getProperty("top1m") != null ? v.getProperty("top1m").toString() : "?";
+            String _skDomeny = v.getProperty("skDomeny") != null ? v.getProperty("skDomeny").toString() : "?";
 
             String name = v.getProperty("name").toString();
             String owner = v.getProperty("owner").toString();
@@ -170,15 +170,17 @@ public class Stats {
     }
 
     public static void main(String[] args) throws IOException, ClassNotFoundException, IllegalAccessException, InstantiationException {
-        Object2StableIntSet<String> global = new Object2StableIntHashSet<String>(1000);
+        GlobalStringTable global = new GlobalStringTable();
         //      StringIndex a = StringIndex.loadIndex("habilitace\\CzDomains2AllCorpus.txt", global);
         //      OZAnalysis.createAndSaveReverseIndex(a, "habilitace\\allCorpus2CzDomains.txt");
         //      if (1 == 1) return;
 
-        //exportDomainsToFile("habilitace\\aggregatedDomains.csv");
+   //     exportDomainsToFile("habilitace\\aggregatedDomains.csv");
+
         log.info("Loading domains...");
         List<Domain> domains = loadDomainsFromFile("habilitace\\aggregatedDomains.csv", global);
         List<Domain> czDomains = getCZDomains(domains);
+        List<Domain> detailedDomains = getDetailedDomains(domains);
 
         log.info("Loading UPV and OHIM");
         List<StatOz> upvList = loadRawOz("exported-upv-oz.txt", global);
@@ -228,27 +230,34 @@ public class Stats {
         StringIndex czDomains2AllCorpus = StringIndex.loadIndex("habilitace\\CzDomains2AllCorpus.txt", global);
 
         log.info("Count OZ with hit...");
-        //Set<String> ozWithHitInCzDomains = new HashSet<String>(10 * 1000);
-        //populateHitSets(ozWithHitInCzDomains, filteredOz, allCorpus2CzDomains);
-        //saveSet("habilitace\\FilteredOzWithHitInCzDomains.txt", ozWithHitInCzDomains);
-        Set<String> ozWithHitInCzDomains = loadSet("habilitace\\FilteredOzWithHitInCzDomains.txt", global);
+        Set<String> ozWithHitInCzDomains = new HashSet<String>(10 * 1000);
+        populateHitSets(ozWithHitInCzDomains, filteredOz, allCorpus2CzDomains);
+        saveSet("habilitace\\FilteredOzWithHitInCzDomains.txt", ozWithHitInCzDomains);
+        //Set<String> ozWithHitInCzDomains = loadSet("habilitace\\FilteredOzWithHitInCzDomains.txt", global);
 
-        //StringIndex czDomains2CorpusLine = buildAndSaveDomainsToCorpus(czDomains2AllCorpus, "habilitace\\CzDomains2CorpusLine.txt");
+        //      StringIndex czDomains2CorpusLine = buildAndSaveDomainsToCorpus(czDomains2AllCorpus, "habilitace\\CzDomains2CorpusLine.txt");
         StringIndex czDomains2CorpusLine = StringIndex.loadIndex("habilitace\\CzDomains2CorpusLine.txt", global);
+        //czDomains2CorpusLine.saveIndex("habilitace\\CzDomains2CorpusLine.txt");
 
         log.info("Build FINAL Corpus to CzDomain mapping");
 //        Set<String> filteredCorpus = createFilteredCorpus(allCorpus);
 //        OZAnalysis.buildAndSaveCorpus2DomainMapping(filteredCorpus, allCorpus2CzDomains, czDomains2CorpusLine, "habilitace\\FilteredCorpus2Domain.txt");
+//        filteredCorpus.clear();
+
+//        log.info("Loading...");
+//        StringIndex ss = StringIndex.loadIndex("habilitace\\FilteredCorpus2Domain.txt", global);
+//        log.info("Saving");
+//        ss.saveIndex("habilitace\\FilteredCorpus2DomainSorted.txt");
 
         StringIndex filteredCorpus2DomainSorted = StringIndex.loadIndex("habilitace\\FilteredCorpus2DomainSorted.txt", global);
 
         log.info("Build FINAL OZ to CzDomain mapping");
-        //OZAnalysis.buildAndSaveOz2DomainMapping(ozWithHitInCzDomains, allCorpus2CzDomains, czDomains2CorpusLine, "habilitace\\Oz2Domain.txt");
+        //      OZAnalysis.buildAndSaveOz2DomainMapping(ozWithHitInCzDomains, allCorpus2CzDomains, czDomains2CorpusLine, "habilitace\\Oz2Domain.txt");
         StringIndex oz2Domain = StringIndex.loadIndex("habilitace\\Oz2Domain.txt", global);
 
         StatsContext context = new StatsContext(domains, upvList, ohimList, allOZ, filteredOz, czDictionary, enCorpus,
                 czCorpus, czCities, czNames, allCorpus, keysFromOz, czDomains, allCorpus2CzDomains,
-                ozWithHitInCzDomains);
+                ozWithHitInCzDomains, filteredCorpus2DomainSorted, oz2Domain, czDomains2CorpusLine, detailedDomains);
         global = null;
 
         log.info("READY*****");
@@ -302,6 +311,53 @@ public class Stats {
                 for (Stat s : stats) {
                     System.out.println(s.getClass().getSimpleName());
                 }
+            }
+
+            if (in.startsWith("u ")) {
+                String stat = in.substring(2, in.length()).trim();
+
+                log.info("Updating stats for: " + stat);
+
+                BufferedReader brr = new BufferedReader(new FileReader("habilitace\\stats.csv"));
+                BufferedWriter bw = new BufferedWriter(new FileWriter("habilitace\\stats.csv.new"));
+                for (Stat s : stats) {
+                    String clazz = s.getClass().getSimpleName();
+                    if (clazz.startsWith(stat)) {
+                        while (true) {
+                            String line = brr.readLine();
+                            if (line == null) break;
+
+                            line = line.trim();
+                            if ("".equals(line)) break;
+                        }
+
+                        s.printStat(context, bw);
+                        bw.newLine();
+                    } else {
+                        log.info("Ignoring: " + clazz);
+                        while (true) {
+                            String line = brr.readLine();
+                            if (line == null) break;
+
+                            bw.write(line);
+                            bw.newLine();
+
+                            line = line.trim();
+                            if ("".equals(line)) break;
+                        }
+                    }
+                }
+
+                bw.close();
+                brr.close();
+
+                File file = new File("habilitace\\stats.csv");
+                file.delete();
+
+                file = new File("habilitace\\stats.csv.new");
+                file.renameTo(new File("habilitace\\stats.csv"));
+
+                log.info("Done...");
             }
 
             if (in.startsWith("a ")) {
@@ -360,6 +416,22 @@ public class Stats {
             }
         }
 
+    }
+
+    private static List<Domain> getDetailedDomains(List<Domain> domains) {
+        List<Domain> result = new ArrayList<Domain>();
+        for (Domain d : domains) {
+            String name = d.getName().toLowerCase();
+            String ozName = d.getOzName().toLowerCase();
+
+            if (name.endsWith(".cz")) {
+                if (!ozName.equals("?") && !ozName.equals("na") && !ozName.equals("no") && !ozName.equals("bravo")) {
+                    result.add(d);
+                }
+            }
+        }
+
+        return result;
     }
 
     public static Set<String> createFilteredCorpus(Set<String> allCorpus) {

@@ -44,6 +44,8 @@ public class StringIndex {
         BufferedReader br = new BufferedReader(new FileReader(filename));
         String currentKey = null;
         StringIndex index = new StringIndex();
+        Set<String> values = new HashSet<String>();
+
         while (true) {
             String line = br.readLine();
             if (line == null) break;
@@ -51,9 +53,14 @@ public class StringIndex {
             line = line.trim();
             if (line.startsWith("Index:")) {
                 currentKey = line.substring("Index:".length());
+                values.clear();
             } else {
                 if (currentKey == null) throw new IllegalStateException();
-                index.put(global.add(currentKey), global.add(line));
+                String value = global.add(line);
+                if (!values.contains(value)) {
+                    values.add(value);
+                    index.put(global.add(currentKey), value );
+                }
             }
         }
         br.close();

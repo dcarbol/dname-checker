@@ -31,7 +31,7 @@ public class OZFactory {
             skoda.addGoodDomain("skoda.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "volksvagen"));
+            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "volksvagen", "fabia", "octavia", "felicia", "passat", "porsche"));
             skoda.setCompetitors(ss);
 
             OZ.add(skoda);
@@ -42,7 +42,7 @@ public class OZFactory {
             fabia.addGoodDomain("fabia.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("skoda", "fabia", "audi", "seat", "volksvagen"));
+            ss.removeAll(Arrays.asList("skoda", "fabia", "audi", "seat", "volksvagen", "octavia"));
             fabia.setCompetitors(ss);
 
             OZ.add(fabia);
@@ -53,7 +53,7 @@ public class OZFactory {
             octavia.addGoodDomain("octavia.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("octavia", "skoda", "fabia", "audi", "seat", "volksvagen"));
+            ss.removeAll(Arrays.asList("octavia", "skoda", "fabia", "audi", "seat", "volksvagen", "felicia"));
             octavia.setCompetitors(ss);
 
             OZ.add(octavia);
@@ -86,7 +86,7 @@ public class OZFactory {
             volkswagen.addGoodDomain("volkswagen.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "wolksvagen"));
+            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "wolksvagen", "octavia", "passat", "fabia", "felicia", "porsche", "tatra"));
             volkswagen.setCompetitors(ss);
 
             OZ.add(volkswagen);
@@ -195,7 +195,7 @@ public class OZFactory {
             honda.addGoodDomain("honda.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("honda"));
+            ss.removeAll(Arrays.asList("honda", "civic"));
             honda.setCompetitors(ss);
 
             OZ.add(honda);
@@ -217,7 +217,7 @@ public class OZFactory {
             oz.addGoodDomain("ford.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("ford", "mustang", "escort", "mazda", "lincoln"));
+            ss.removeAll(Arrays.asList("ford", "mustang", "escort", "mazda", "lincoln", "wrangler"));
             oz.setCompetitors(ss);
 
             OZ.add(oz);
@@ -250,7 +250,7 @@ public class OZFactory {
             oz.addGoodDomain("audi.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "wolksvagen"));
+            ss.removeAll(Arrays.asList("skoda", "audi", "seat", "wolksvagen", "porsche", "passat", "octavia"));
             oz.setCompetitors(ss);
 
             OZ.add(oz);
@@ -261,7 +261,7 @@ public class OZFactory {
             toyota.addGoodDomain("toyota.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("citroen", "peugeot", "toyota", "subaru"));
+            ss.removeAll(Arrays.asList("citroen", "peugeot", "toyota", "subaru", "lexus"));
             toyota.setCompetitors(ss);
 
             OZ.add(toyota);
@@ -283,7 +283,7 @@ public class OZFactory {
             subaru.addGoodDomain("subaru.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("suzuki", "mazda", "mitsubishi", "restaurace", "subaru", "toyota"));
+            ss.removeAll(Arrays.asList("suzuki", "mazda", "mitsubishi", "restaurace", "subaru", "toyota", "daihatsu"));
             subaru.setCompetitors(ss);
 
             OZ.add(subaru);
@@ -303,7 +303,7 @@ public class OZFactory {
             OZ porsche = new OZ("porsche", Keys.AREA.CARS);
             porsche.addGoodDomain("porsche.cz");
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("porsche", "skoda", "audi", "seat", "wolksvagen"));
+            ss.removeAll(Arrays.asList("porsche", "skoda", "audi", "seat", "wolksvagen", "fabia", "bentley", "passat"));
             porsche.setCompetitors(ss);
 
             OZ.add(porsche);
@@ -337,7 +337,7 @@ public class OZFactory {
             jeep.addGoodDomain("jeep.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("jeep", "chrysler", "daimler", "fiat", "dodge", "ubytovani"));
+            ss.removeAll(Arrays.asList("jeep", "chrysler", "daimler", "fiat", "dodge", "ubytovani", "wrangler"));
             jeep.setCompetitors(ss);
 
             OZ.add(jeep);
@@ -363,6 +363,18 @@ public class OZFactory {
             daimler.setCompetitors(ss);
 
             OZ.add(daimler);
+        }
+
+        {
+            OZ fiat = new OZ("fiat", Keys.AREA.CARS);
+            fiat.addGoodDomain("fiat.cz");
+
+            Set<String> ss = new HashSet<String>(Keys.carsSet);
+//            ss.removeAll(Arrays.asList("jeep", "chrysler", "daimler", "fiat", "dodge", "wrangler"));
+            ss.removeAll(Arrays.asList("fiat", "lancia", "jeep", "alfa romeo", "iveco", "renault", "chrysler", "ferrari"));
+            fiat.setCompetitors(ss);
+
+            OZ.add(fiat);
         }
 
         {
@@ -403,7 +415,7 @@ public class OZFactory {
             jaguar.addGoodDomain("jaguar.cz");
 
             Set<String> ss = new HashSet<String>(Keys.carsSet);
-            ss.removeAll(Arrays.asList("jaguar", "daimler"));
+            ss.removeAll(Arrays.asList("jaguar", "daimler", "landrover"));
             jaguar.setCompetitors(ss);
 
             OZ.add(jaguar);

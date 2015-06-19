@@ -736,7 +736,7 @@ public class OZAnalysis {
     }
 
 
-    public static String OZ_FORCE_ADD = " skoda apple apples renault avon iphone hyundai opel citroen bosch toyota honda audi google mercedes peugeot suzuki samsung facebook nordic subaru " +
+    public static String OZ_FORCE_ADD = " fiat skoda apple apples renault avon iphone hyundai opel citroen bosch toyota honda audi google mercedes peugeot suzuki samsung facebook nordic subaru " +
             " android nokia lego lega porsche tatra nissan nike enduro mazda tesco windows minecraft allianz jawa jeep zverimex ikea segway adidas mitsubishi braun xbox onyx ferratum gourmet " +
             " youtube dedra lidl panasonic vibro zetor patria barbie csob acer tescoma husqvarna dell bitcoin vodafone karcher husky nikon lenovo seat aukro tchibo skype " +
             " ipad playstation ferrari hummer aston flamenco alza thule provident chevrolet philips portas lomax jaguar penny volkswagen ptakoviny " +

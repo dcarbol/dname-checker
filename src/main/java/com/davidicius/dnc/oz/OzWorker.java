@@ -707,22 +707,50 @@ public class OzWorker {
                 if (query.startsWith("list domains oz ")) {
                     history.add(query);
                     query = query.substring("list domains oz ".length()).trim();
+                    if (query.trim().equals("all")) {
+                        Iterable<Vertex> domains = DbService.db.graph().getVerticesOfClass("DOM");
+                        lastDomains.clear();
+                        int i = 0;
+                        int count = 0;
+                        for (Vertex domain : domains) {
+                            String ozName = "?";
+                            if (domain.getProperty("ozName") != null) {
+                                ozName = domain.getProperty("ozName").toString().toLowerCase();
+                            }
 
-                    String[] parts = query.split(" ");
-                    lastDomains.clear();
-                    int i = 0;
-                    for (String part : parts) {
-                        String oz = part.trim().toLowerCase();
-                        if (oz.equals("")) continue;
-                        Set<Vertex> r = DbService.db.getDomForOzName(oz);
-
-                        for (Vertex v : r) {
-                            String domainName = v.getProperty("name");
-                            if (domainName != null) {
-                                System.out.println(String.format("%03d. %s", (i + 1), toStringDOM(v)));
+                            if (!ozName.equals("?") && !ozName.equals("na") && !ozName.equals("no") && !ozName.equals("bravo")) {
+                                System.out.println(String.format("%03d. %s", (i + 1), toStringDOM(domain)));
 
                                 i++;
-                                lastDomains.add(domainName);
+                                String name = domain.getProperty("name").toString();
+                                lastDomains.add(name);
+                            }
+
+                            count++;
+                            if (count % 10000 == 0) {
+                                System.out.println(String.format("Processed: %d", count));
+                            }
+
+                            DbService.db.graph().commit();
+                        }
+                    } else {
+                        String[] parts = query.split(" ");
+                        lastDomains.clear();
+                        int i = 0;
+                        for (String part : parts) {
+                            String oz = part.trim().toLowerCase();
+                            if (oz.equals("")) continue;
+
+                            Set<Vertex> r = DbService.db.getDomForOzName(oz);
+
+                            for (Vertex v : r) {
+                                String domainName = v.getProperty("name");
+                                if (domainName != null) {
+                                    System.out.println(String.format("%03d. %s", (i + 1), toStringDOM(v)));
+
+                                    i++;
+                                    lastDomains.add(domainName);
+                                }
                             }
                         }
                     }
@@ -941,6 +969,7 @@ public class OzWorker {
                     System.out.println("stats");
                     System.out.println("exists cz");
                     System.out.println("export cz");
+                    System.out.println("fragment vector traitId...");
                     System.out.println("fragment vector traitId...");
                     System.out.println("list fragment BAD(Y|N] FIN(Y|N) vector traitId...");
                     System.out.println("verbose on");
@@ -1458,13 +1487,9 @@ public class OzWorker {
             return;
         }
 
-        Iterable<Edge> edges = d.getEdges(Direction.OUT, what);
-        for (Edge e : edges) {
-            Vertex aa = e.getVertex(Direction.IN);
-            if (aa.equals(o)) {
-                System.out.println(String.format("Combination '%s' -> '%s' ALREADY marked as %s", domainName, ozNumber, what));
-                return;
-            }
+        Iterable<Edge> list = d.getEdges(Direction.OUT);
+        for (Edge e : list) {
+            e.remove();
         }
 
         d.addEdge(what, o);

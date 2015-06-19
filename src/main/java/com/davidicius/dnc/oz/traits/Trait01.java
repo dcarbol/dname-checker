@@ -74,6 +74,7 @@ public class Trait01 extends AbstractTrait {
         patterns.add(Pattern.compile("internal\\s+server\\s+error"));
         patterns.add(Pattern.compile("u\\s+ziet\\s+deze\\s+pagina\\s+omdat"));
         patterns.add(Pattern.compile("tato\\s+domena\\s+je\\s+v\\s+soucasne\\s+dobe"));
+        patterns.add(Pattern.compile("ceka\\s+na\\s+nahrani\\s+sveho\\s+obsahu"));
     }
 
     public boolean hasTrait(Vertex domain, String page, Document document, OZ oz) {
